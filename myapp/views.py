@@ -17,6 +17,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
+
 from .forms import UserForm
 from .models import User
 
@@ -42,7 +43,7 @@ def register(request):
                 first_name=first_name, last_name=last_name, username=email, password=password, email=email)
 
             # Gerar token de verificação
-            uid = urlsafe_base64_encode(force_bytes(user.id))
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = default_token_generator.make_token(user)
 
             # Construir o link de verificação
@@ -82,11 +83,32 @@ def login_view(request):
 
         # verficar se o usuario foi autenticdo com sucesso
         if user is not None:
-            login(request, user)
-            return HttpResponseRedirect(reverse("index"))
+            if user.is_active:
+                login(request, user)
+                # Resetar o contador de tentativas bem-sucedidas
+                user.login_attempts = 0
+                user.save()
+                return HttpResponseRedirect(reverse("index"))
+            else:
+                return render(request, "auth/login.html", {
+                    "message": "Sua conta está bloqueada. Entre em contato com o suporte."
+                })
         else:
+            # Incrementar o contador de tentativas malsucedidas
+            user = User.objects.get(username=email)
+            user.login_attempts += 1
+            user.save()
+
+            if user.login_attempts >= 3:
+                user.is_active = False
+                user.save()
+
+                return render(request, "auth/login.html", {
+                    "message": "Sua conta foi bloqueada devido a múltiplas tentativas malsucedidas. Entre em contato com o suporte.."
+                })
+
             return render(request, "auth/login.html", {
-                "message": "Email ou Passowrd inválida."
+                "message": "Credenciais inválidas. Tente novamente."
             })
     return render(request, "auth/login.html")
 
