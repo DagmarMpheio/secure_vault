@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+
+{% block title %} Editar Perfil {% endblock title%} 
+
+{% load static%}
+
+{% block body %}
+<section>
+    <div class="container py-5">
+      <div class="row">
+        <div class="col-lg-4">
+          <div class="card mb-4">
+            <div class="card-body text-center">
+              <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3.webp" alt="avatar"
+                class="rounded-circle img-fluid" style="width: 150px;">
+              <h5 class="my-3">{{user.first_name}} {{user.last_name}}</h5>
+              <p class="text-muted mb-1">Full Stack Developer</p>
+              <p class="text-muted mb-4">Lubango, Huíla</p>
+              <!-- <div class="d-flex justify-content-center mb-2">
+                <a type="button" href="{% url 'edit-profile' %}" class="btn btn-primary">Editar</a>
+                <button type="button" class="btn btn-outline-primary ms-1">Message</button> 
+              </div>-->
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-8">
+          <div class="card mb-4">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{form.as_p}}
+                    <div class="d-flex justify-content-center mb-2">
+                       <button type="submit"
+                                class=" btn btn-primary"><i class="fa fa-save"></i> Actualizar</button>&nbsp;
+                       <a type="button"
+                                class="btn btn-danger" href="/profile"><i class="fa fa-cancel"></i> Cancelar <span class="glyphicon glyphicon-cancel"></span></a>
+
+                    </div>
+                </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock body %}
