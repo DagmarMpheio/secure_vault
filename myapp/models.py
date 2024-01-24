@@ -5,4 +5,5 @@ from django.contrib.auth.models import AbstractUser
 
 # Modelo dos Usuários
 class User(AbstractUser):
+    email_is_verified = models.BooleanField(default=False)
     pass

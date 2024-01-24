@@ -61,6 +61,14 @@
                     <!-- Submit button -->
                     <button type="submit" class="btn btn-primary btn-block mb-3">Registar</button>
                 </form>
+
+                <!-- mensagem -->
+                {% if message %}
+                    <!--ERROR MESSAGE-->
+                    <div class="alert alert-danger" role="alert">
+                        {{message}}
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>

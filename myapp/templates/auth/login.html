@@ -53,6 +53,13 @@
               <p><a href="{% url 'password_reset' %}">Esqueci a senha</a></p>
             </div>
           </form>
+          <!-- mensagem -->
+          {% if message %}
+              <!--ERROR MESSAGE-->
+              <div class="alert alert-danger" role="alert">
+                {{message}}
+              </div>
+          {% endif %}
         </div>
       </div>
       <!-- Pills content -->

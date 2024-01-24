@@ -9,10 +9,20 @@ from django.contrib import messages
 from django.http import HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
 
+# verificacao de email
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+
 from .forms import UserForm
 from .models import User
 
 # Create your views here.
+
+
 def register(request):
     if request.method == "POST":
         first_name = request.POST["first_name"]
@@ -30,13 +40,34 @@ def register(request):
         try:
             user = User.objects.create_user(
                 first_name=first_name, last_name=last_name, username=email, password=password, email=email)
-            user.save()
+
+            # Gerar token de verificação
+            uid = urlsafe_base64_encode(force_bytes(user.id))
+            token = default_token_generator.make_token(user)
+
+            # Construir o link de verificação
+            verification_link = f"{request.build_absolute_uri(reverse('verify_email', kwargs={'uidb64': uid, 'token': token}))}"
+
+            # Enviar e-mail de verificação
+            subject = 'Verifique seu e-mail'
+            message = render_to_string('auth/verification_email.html', {
+                'user': user,
+                'verification_link': verification_link,
+            })
+
+            # Remover tags HTML para o corpo do e-mail simples
+            plain_message = strip_tags(message)
+            from_email = 'securevault@gmail.com'
+            to_email = user.email
+            send_mail(subject, plain_message, from_email,
+                      [to_email], html_message=message)
+
         except IntegrityError:
             return render(request, "auth/register.html", {
                 "message": "O Email inserido já se encotrado associado com outra conta!"
             })
-        
-        #assim que cadastrar é redirecionado no painel
+
+        # assim que cadastrar é redirecionado no painel
         login(request, user)
         return HttpResponseRedirect(reverse("index"))
     return render(request, "auth/register.html")
@@ -102,3 +133,22 @@ def update_profile(request):
                 messages.error(request, 'Algo ocorreu mal\nErro: {}'.format(e))
                 return redirect('/profile')
     return render(request, "user/edit-profile.html", {'form': form})
+
+
+def verify_email(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and default_token_generator.check_token(user, token):
+        # Marcar o e-mail como verificado
+        user.email_is_verified = True
+        user.save()
+
+        # Adicionar lógica adicional conforme necessário
+
+        return render(request, "auth/email_verified.html")
+    else:
+        return render(request, "auth/email_verification_failed.html")

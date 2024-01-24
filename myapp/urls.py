@@ -19,4 +19,7 @@ urlpatterns = [
         template_name="password/password-reset-confirm.html"), name='password_reset_confirm'),
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(
         template_name="password/password-reset-complete.html"), name='password_reset_complete'),
+
+    # verificar email
+    path('verify-email/<str:uidb64>/<str:token>/', views.verify_email, name='verify_email'),
 ]

@@ -1,0 +1,20 @@
+{% extends "auth-layout.html" %}
+
+{% block title %} Verificação de Email Falhou {% endblock title%} 
+
+{% load static%}
+
+{% block body %}
+<div class="container d-flex align-items-center justify-content-center" style="min-height: 100vh;">
+    <div class="text-center w-50">
+        <!-- app logo -->
+        <img src="{% static 'img/app-logo.jpg'%}" alt="Logo" class="img-fluid mx-auto mb-4" style="max-width: 150px;">
+
+        <div class="">
+            <h1>Falha na Verificação de E-mail</h1>
+            <p>O link de verificação é inválido ou expirou.</p>
+            <p>Verifique se você está usando o link correto ou solicite um novo e-mail de verificação.</p>
+        </div>
+    </div>
+</div>
+{% endblock body %}
